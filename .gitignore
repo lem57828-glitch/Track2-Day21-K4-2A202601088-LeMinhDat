@@ -1,0 +1,13 @@
+mlflow.db
+mlartifacts/
+models/
+outputs/
+data/train_batch1.csv
+data/holdout.csv
+data/train_batch2.csv
+data/_adult.data
+data/_adult.test
+sa-key.json
+.env
+.venv/
+__pycache__/
