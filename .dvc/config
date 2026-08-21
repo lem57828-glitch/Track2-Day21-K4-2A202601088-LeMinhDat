@@ -1,4 +1,5 @@
 [core]
     remote = labstore
 ['remote "labstore"']
-    url = azure://labstore/dvc
+    url = s3://income-lab-488850522183/dvc
+    region = ap-southeast-1

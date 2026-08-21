@@ -1,14 +1,13 @@
 import os
 
+import boto3
 import joblib
-from azure.storage.blob import BlobServiceClient
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
 
-STORAGE_CONNECTION_STRING = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-ARTIFACT_CONTAINER = os.environ["ARTIFACT_CONTAINER"]
+ARTIFACT_BUCKET = os.environ["ARTIFACT_BUCKET"]
 MODEL_KEY = "artifacts/current/model.joblib"
 MODEL_PATH = os.path.expanduser("~/models/model.joblib")
 
@@ -16,11 +15,9 @@ MODEL_PATH = os.path.expanduser("~/models/model.joblib")
 def download_model():
     """Tai model.joblib tu cloud storage ve may khi server khoi dong."""
     os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-    client = BlobServiceClient.from_connection_string(STORAGE_CONNECTION_STRING)
-    blob_client = client.get_blob_client(container=ARTIFACT_CONTAINER, blob=MODEL_KEY)
-    with open(MODEL_PATH, "wb") as f:
-        f.write(blob_client.download_blob().readall())
-    print(f"Da tai model tu {ARTIFACT_CONTAINER}/{MODEL_KEY} ve {MODEL_PATH}")
+    client = boto3.client("s3")
+    client.download_file(ARTIFACT_BUCKET, MODEL_KEY, MODEL_PATH)
+    print(f"Da tai model tu s3://{ARTIFACT_BUCKET}/{MODEL_KEY} ve {MODEL_PATH}")
 
 
 download_model()

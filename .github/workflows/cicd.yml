@@ -42,8 +42,9 @@ jobs:
 
       - name: Authenticate to Cloud Storage
         run: |
-          dvc remote modify --local labstore connection_string "${{ secrets.STORAGE_CREDENTIALS }}"
-          echo "AZURE_STORAGE_CONNECTION_STRING=${{ secrets.STORAGE_CREDENTIALS }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
 
       - name: Pull data with DVC
         run: |
@@ -62,19 +63,18 @@ jobs:
         run: |
           python - <<'PYEOF'
           import os
-          from azure.storage.blob import BlobServiceClient
+          import boto3
 
-          client = BlobServiceClient.from_connection_string(os.environ["AZURE_STORAGE_CONNECTION_STRING"])
-          blob_client = client.get_blob_client(
-              container=os.environ["ARTIFACT_CONTAINER"],
-              blob="artifacts/current/model.joblib",
+          client = boto3.client("s3")
+          client.upload_file(
+              "models/model.joblib",
+              os.environ["ARTIFACT_BUCKET"],
+              "artifacts/current/model.joblib",
           )
-          with open("models/model.joblib", "rb") as f:
-              blob_client.upload_blob(f, overwrite=True)
           print("Model uploaded to artifacts/current/model.joblib")
           PYEOF
         env:
-          ARTIFACT_CONTAINER: ${{ secrets.ARTIFACT_CONTAINER }}
+          ARTIFACT_BUCKET: ${{ secrets.ARTIFACT_BUCKET }}
 
       - name: Save report as artifact
         uses: actions/upload-artifact@v4

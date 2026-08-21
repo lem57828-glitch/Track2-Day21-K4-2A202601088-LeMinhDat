@@ -4,8 +4,8 @@ scikit-learn
 mlflow
 joblib
 pyyaml
-dvc[azure]
+dvc[s3]
 fastapi
 uvicorn
-azure-storage-blob
+boto3
 pytest
